@@ -6,7 +6,7 @@ description = "Deploy a HuggingFace space with a HF dataset from a UI."
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-streamlit = "^1.28.0"
+streamlit = "^1.37.0"
 watchdog = "^3.0.0"
 datasets = "^2.14.6"
 lilac = "^0.1.16"
