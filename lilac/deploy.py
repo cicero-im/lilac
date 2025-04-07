@@ -16,6 +16,7 @@ from .config import Config
 from .env import get_project_dir
 from .project import PROJECT_CONFIG_FILENAME, read_project_config, write_project_config
 from .utils import get_hf_dataset_repo_id, get_lilac_cache_dir, log, to_yaml
+from security import safe_command
 
 HF_SPACE_DIR = '.hf_spaces'
 PY_DIST_DIR = 'dist'
@@ -460,4 +461,4 @@ def deploy_config(
 
 def run(cmd: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
   """Run a command and return the result."""
-  return subprocess.run(cmd, shell=True, check=True, capture_output=capture_output, text=True)
+  return safe_command.run(subprocess.run, cmd, shell=True, check=True, capture_output=capture_output, text=True)
