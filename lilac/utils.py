@@ -28,12 +28,12 @@ from typing import (
 )
 
 import numpy as np
-import requests
 import yaml
 from pydantic import BaseModel
 from yaml import CLoader as Loader
 
 from .env import env, get_project_dir
+from security import safe_requests
 
 if TYPE_CHECKING:
   from google.cloud.storage import Blob, Client
@@ -95,7 +95,7 @@ def download_http_files(filepaths: list[str]) -> list[str]:
       tmp_filename = uuid.uuid4().hex
       tmp_filepath = f'/tmp/{get_project_dir()}/local_cache/{tmp_filename}'
       log(f'Downloading from url {filepath} to {tmp_filepath}')
-      dl = requests.get(filepath, timeout=10000, allow_redirects=True)
+      dl = safe_requests.get(filepath, timeout=10000, allow_redirects=True)
       with open_file(tmp_filepath, 'wb') as f:
         f.write(dl.content)
       filepath = tmp_filepath
