@@ -2,7 +2,6 @@
 import base64
 import dataclasses
 import os.path
-import random
 import re
 from datetime import datetime
 from time import sleep
@@ -16,6 +15,7 @@ from ..env import get_project_dir
 from ..schema import Item, schema
 from ..source import Source, SourceSchema
 from ..utils import log
+import secrets
 
 if TYPE_CHECKING:
   from google.oauth2.credentials import Credentials
@@ -208,7 +208,7 @@ class GmailSource(Source):
 
       if retry_batch:
         log(f'Failed to fetch {len(retry_batch)} threads. Retrying...')
-        timeout = 2 ** (num_retries - 1) + random.uniform(0, 1)
+        timeout = 2 ** (num_retries - 1) + secrets.SystemRandom().uniform(0, 1)
         sleep(timeout)
         num_retries += 1
       else:

@@ -1,7 +1,6 @@
 """Functions for generating titles and categories for clusters of documents."""
 
 import functools
-import random
 from typing import Any, Iterator, Optional, Sequence, cast
 
 import instructor
@@ -25,6 +24,7 @@ from ..signal import (
 )
 from ..tasks import TaskInfo
 from ..utils import chunks, log
+import secrets
 
 _TOP_K_CENTRAL_DOCS = 7
 _TOP_K_CENTRAL_TITLES = 20
@@ -385,7 +385,7 @@ def compute_titles(
         sorted_docs = list(set(sorted_docs))
 
         # Shuffle the cluster to avoid biasing the topic function.
-        random.shuffle(sorted_docs)
+        secrets.SystemRandom().shuffle(sorted_docs)
 
         # Sort the cluster by membership probability after shuffling so that we still choose high
         # membership scores but they are still shuffled when the values are equal.

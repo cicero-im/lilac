@@ -1,6 +1,5 @@
 """Parquet source."""
 import os
-import random
 from typing import ClassVar, Optional, cast
 
 import duckdb
@@ -14,6 +13,7 @@ from ..source import Source, SourceManifest, SourceSchema
 from ..sources.duckdb_utils import convert_path_to_duckdb, duckdb_setup
 from ..tasks import TaskId
 from ..utils import download_http_files
+import secrets
 
 # Number of rows to read per batch.
 ROWS_PER_BATCH_READ = 50_000
@@ -88,7 +88,7 @@ class ParquetSource(Source):
       # The 1.5 multiplier gives some wiggle room for heterogeneous shard sizes, in case one shard
       # fails to yield as many samples as hoped.
       samples_per_shard = max(1, int((self.sample_size * 1.5) // num_shards))
-      duckdb_files = random.sample(duckdb_files, num_shards)
+      duckdb_files = secrets.SystemRandom().sample(duckdb_files, num_shards)
       self._duckdb_files = duckdb_files
 
       shard_query = '\nUNION ALL\n'.join(
