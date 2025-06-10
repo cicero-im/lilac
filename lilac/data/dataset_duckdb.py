@@ -859,13 +859,13 @@ class DatasetDuckDB(Dataset):
           f"""
           CREATE OR REPLACE VIEW {cache_view} as (
             SELECT {ROWID} FROM read_json_auto(
-              '{jsonl_cache_filepath}',
+              ?,
               IGNORE_ERRORS=true,
               hive_partitioning=false,
               format='newline_delimited')
           );
-        """
-        )
+        """, 
+        (jsonl_cache_filepath, ))
         anti_join = f'ANTI JOIN {cache_view} USING({ROWID})'
 
     result = con.execute(
@@ -979,8 +979,6 @@ class DatasetDuckDB(Dataset):
       flatten_depth = len([part for part in select_path if part == PATH_WILDCARD])
 
       if embedding is not None:
-        map_fn = transform_fn
-        vector_index = self._get_vector_db_index(embedding, select_path)
         inputs_1, inputs_2 = itertools.tee(inputs_1, 2)
         flat_keys = flatten_keys((rowid for (rowid, _) in inputs_2), input_values_0)
         sparse_out = sparse_to_dense_compute(flat_keys, lambda keys: map_fn(vector_index.get(keys)))
@@ -1471,7 +1469,7 @@ class DatasetDuckDB(Dataset):
       elif isinstance(res, list):
         for chunk in res:
           assert EMBEDDING_KEY in chunk and SPAN_KEY in chunk, (
-            f'load_fn must return a list of `ll.chunk_embedding()` or a single numpy array. '
+            'load_fn must return a list of `ll.chunk_embedding()` or a single numpy array. '
             f'Got: {type(res)}'
           )
         return res
@@ -2096,7 +2094,6 @@ class DatasetDuckDB(Dataset):
       return None
     if len(sort_by) < 1:
       return None
-    primary_sort_by = sort_by[0]
     udf_cols_to_sort_by = [
       udf_col
       for udf_col in udf_columns
@@ -2443,8 +2440,6 @@ class DatasetDuckDB(Dataset):
         if isinstance(signal, VectorSignal):
           embedding_signal = signal
           self._assert_embedding_exists(udf_col.path, embedding_signal.embedding)
-
-          vector_store = self._get_vector_db_index(embedding_signal.embedding, udf_col.path)
           flat_keys = flatten_keys(df[ROWID], input)
           signal_out = sparse_to_dense_compute(
             flat_keys, lambda keys: embedding_signal.vector_compute(vector_store.get(keys))
@@ -3371,13 +3366,6 @@ class DatasetDuckDB(Dataset):
       filter_likes=filters, col_aliases={}, udf_aliases={}, manifest=self.manifest()
     )
     filters.extend(self._compile_include_exclude_filters(include_labels, exclude_labels))
-    rows = self.select_rows(
-      columns,
-      filters=filters,
-      combine_columns=True,
-      include_deleted=include_deleted,
-      exclude_signals=not include_signals,
-    )
 
     def _gen() -> Iterator[Item]:
       for row in rows:
@@ -3956,8 +3944,6 @@ def _auto_bins(stats: StatsResult) -> list[Bin]:
     # Avoid division by zero when value_range = 0
     const_val = cast(float, stats.min_val)
     return [('0', const_val, None)]
-
-  is_integer = stats.value_samples and all(isinstance(val, int) for val in stats.value_samples)
 
   def _round(value: float) -> float:
     # Select a round ndigits as a function of the value range. We offset it by 2 to allow for some

@@ -53,10 +53,10 @@ class SQLiteSource(Source):
     # DuckDB expects s3 protocol: https://duckdb.org/docs/guides/import/s3_import.html.
     duckdb_path = convert_path_to_duckdb(self.db_file)
     self._con.execute(
-      f"""
-      CREATE VIEW t as (SELECT * FROM sqlite_scan('{duckdb_path}', '{self.table}'));
-    """
-    )
+      """
+      CREATE VIEW t as (SELECT * FROM sqlite_scan(?, ?));
+    """, 
+    (duckdb_path, self.table, ))
 
     res = self._con.execute('SELECT COUNT(*) FROM t').fetchone()
     num_items = cast(tuple[int], res)[0]

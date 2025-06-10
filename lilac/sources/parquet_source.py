@@ -85,9 +85,6 @@ class ParquetSource(Source):
       duckdb_files: list[str] = list(set([row[0] for row in glob_rows]))
       # Sub-sample shards so we don't open too many files.
       num_shards = min(self.pseudo_shuffle_num_shards, len(duckdb_files))
-      # The 1.5 multiplier gives some wiggle room for heterogeneous shard sizes, in case one shard
-      # fails to yield as many samples as hoped.
-      samples_per_shard = max(1, int((self.sample_size * 1.5) // num_shards))
       duckdb_files = random.sample(duckdb_files, num_shards)
       self._duckdb_files = duckdb_files
 
@@ -116,7 +113,7 @@ class ParquetSource(Source):
     # DuckDB expects s3 protocol: https://duckdb.org/docs/guides/import/s3_import.html.
     duckdb_paths = [convert_path_to_duckdb(path) for path in filepaths]
     schema = arrow_schema_to_schema(
-      self._con.execute(f"""SELECT * FROM read_parquet('{duckdb_paths[0]}')""")
+      self._con.execute("""SELECT * FROM read_parquet(?)""", (duckdb_paths[0], ))
       .fetch_record_batch(1)
       .schema
     )

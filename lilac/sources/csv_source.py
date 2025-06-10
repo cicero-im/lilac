@@ -65,11 +65,11 @@ class CSVSource(Source):
         SAMPLE_SIZE=500000,
         HEADER={self.header},
         {f'NAMES={self.names},' if self.names else ''}
-        DELIM='{self.delim or ','}',
+        DELIM=?,
         IGNORE_ERRORS=true,
         PARALLEL=false
     )"""
-    res = self._con.execute(f'SELECT COUNT(*) FROM {csv_source_sql}').fetchone()
+    res = self._con.execute(f'SELECT COUNT(*) FROM {csv_source_sql}', (self.delim or ',', )).fetchone()
     num_items = cast(tuple[int], res)[0]
 
     self._reader = self._con.execute(
