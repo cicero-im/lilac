@@ -12,6 +12,7 @@ from typing import Union
 import click
 from huggingface_hub import CommitOperationAdd, CommitOperationDelete, HfApi
 from lilac.env import env
+from security import safe_command
 
 HF_SPACE_ID = 'lilacai/lilac_deployer'
 STREAMLIT_APP_DIR = 'lilac_deployer'
@@ -57,7 +58,7 @@ def main() -> None:
 
 def run(cmd: str) -> subprocess.CompletedProcess[bytes]:
   """Run a command and return the result."""
-  return subprocess.run(cmd, shell=True, check=True)
+  return safe_command.run(subprocess.run, cmd, shell=True, check=True)
 
 
 if __name__ == '__main__':

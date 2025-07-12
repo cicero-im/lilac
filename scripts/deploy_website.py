@@ -11,6 +11,7 @@ import os
 import subprocess
 
 import click
+from security import safe_command
 
 
 @click.command()
@@ -37,7 +38,7 @@ def main(staging: bool) -> None:
 
 def run(cmd: str) -> subprocess.CompletedProcess[bytes]:
   """Run a command and return the result."""
-  return subprocess.run(cmd, shell=True, check=True)
+  return safe_command.run(subprocess.run, cmd, shell=True, check=True)
 
 
 if __name__ == '__main__':

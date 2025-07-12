@@ -37,6 +37,7 @@ from lilac.deploy import deploy_project
 from lilac.env import env
 from lilac.load import load
 from lilac.utils import get_datasets_dir, get_hf_dataset_repo_id, log
+from security import safe_command
 
 
 @click.command()
@@ -197,7 +198,7 @@ def deploy_demo(
 
 def run(cmd: str) -> subprocess.CompletedProcess[bytes]:
   """Run a command and return the result."""
-  return subprocess.run(cmd, shell=True, check=True)
+  return safe_command.run(subprocess.run, cmd, shell=True, check=True)
 
 
 if __name__ == '__main__':
