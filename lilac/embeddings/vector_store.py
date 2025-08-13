@@ -9,6 +9,7 @@ import numpy as np
 
 from ..schema import SpanVector, VectorKey
 from ..utils import open_file
+import fickling
 
 
 class VectorStore(abc.ABC):
@@ -104,7 +105,7 @@ class VectorDBIndex:
     """Load the vector index from disk."""
     assert not self._id_to_spans, 'Cannot load into a non-empty index.'
     with open_file(os.path.join(base_path, _SPANS_PICKLE_NAME), 'rb') as f:
-      all_spans: list[tuple[PathKey, list[tuple[int, int]]]] = pickle.load(f)
+      all_spans: list[tuple[PathKey, list[tuple[int, int]]]] = fickling.load(f)
       self._id_to_spans.update(all_spans)
       for path_key, _ in all_spans:
         rowid = cast(str, path_key[0])

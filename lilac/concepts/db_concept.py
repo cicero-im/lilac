@@ -31,6 +31,7 @@ from .concept import (
   Example,
   ExampleIn,
 )
+import fickling
 
 CONCEPTS_DIR = 'concept'
 CONCEPT_JSON_FILENAME = 'concept.json'
@@ -282,7 +283,7 @@ class DiskConceptModelDB(ConceptModelDB):
 
     with open_file(concept_model_path, 'rb') as f:
       try:
-        return pickle.load(f)
+        return fickling.load(f)
       except BaseException:
         # Pickle serialization failed. We fallback to re-creating the model.
         return None
